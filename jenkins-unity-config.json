@@ -14,7 +14,7 @@
         },
         "unityExport": {
             "title": "Export",
-            "platforms": ["iOS", "android"]
+            "platforms": ["iOS"]
         },
         "build": {
             "isEnabled": true,
