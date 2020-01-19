@@ -1,7 +1,7 @@
 {
     "environment": {
         "unityVersion": "2019.3.0f5",
-        "appName": "UnityDemo",
+        "projectName": "UnityDemo",
         "outputPath": "build/output"
     },
     "stages": {

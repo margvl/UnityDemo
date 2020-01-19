@@ -6,7 +6,7 @@ node {
 
         catchError {
             executeSetUpStage()
-            executeUnityExportStageIfNeeded()
+            // executeUnityExportStageIfNeeded()
             executeBuildStageIfNeeded()
             executeDistributionStageIfNeeded()
         }
@@ -149,7 +149,7 @@ class UnityExportStage extends Stage {
     String unityVersion
     String projectPath
     String outputPath
-    String appName
+    String projectName
     String[] platformList
 
     UnityExportStage(
@@ -158,13 +158,13 @@ class UnityExportStage extends Stage {
             String unityVersion,
             String projectPath,
             String outputPath,
-            String appName,
+            String projectName,
             String[] platforms) {
         super(isEnabled, title)
         this.unityVersion = unityVersion
         this.projectPath = projectPath
         this.outputPath = outputPath
-        this.appName = appName
+        this.projectName = projectName
         this.platformList = platforms
     }
 
@@ -178,7 +178,7 @@ class UnityExportStage extends Stage {
                         " -batchmode" +
                         " -quit" +
                         " -projectPath \"${projectPath}\"" +
-                        " -executeMethod ${executionMethod} \"${outputPath}\" \"${appName}\""
+                        " -executeMethod ${executionMethod} \"${outputPath}\" \"${projectName}\""
                 executionCommandList += executionCommand
             }
         }
@@ -204,7 +204,7 @@ UnityExportStage getUnityExportStage(Map environment, Map unityExport) {
             environment.unityVersion,
             env.WORKSPACE,
             environment.outputPath,
-            environment.appName,
+            environment.projectName,
             platformList)
 
     return unityExportStage
@@ -213,7 +213,17 @@ UnityExportStage getUnityExportStage(Map environment, Map unityExport) {
 // -------------------
 // --- Build Stage ---
 // -------------------
+bundle exec fastlane build 
+        projectFilename:null.xcodeproj 
+        configuration:Release 
+        scheme:JenkinsDemo-Staging 
+        outputPath:build/output/gym 
+        outputName:null-0.ipa 
+        exportMethod:ad-hoc 
+        provisioningProfiles:com.telesoftas.unity.demo.staging=>Generic Adhoc
+
 class BuildStage extends Stage {
+    String projectPath
     String projectFilename
     String workspaceFilename
     String outputPath
@@ -222,12 +232,14 @@ class BuildStage extends Stage {
     BuildStage(
             Boolean isEnabled,
             String title,
+            String projectPath,
             String projectFilename,
             String workspaceFilename,
             String outputPath,
             BuildItem[] items) {
         
         super(isEnabled, title)
+        this.projectPath = projectPath
         this.projectFilename = projectFilename
         this.workspaceFilename = workspaceFilename
         this.outputPath = outputPath
@@ -338,9 +350,9 @@ BuildStage getBuildStage(Map environment, Map build) {
     return new BuildStage(
             buildItemList.size() > 0,
             build.title,
-            NameBuilder.getProjectFilename(environment.projectName),
-            NameBuilder.getWorkspaceFilename(environment.workspaceName),
-            environment.outputPath + "/gym",
+            NameBuilder.getProjectFilename(environment.outputPath + "/ios/project", "Unity-iPhone"),
+            NameBuilder.getWorkspaceFilename(null),
+            environment.outputPath + "/ios/gym",
             buildItemList)
 }
 
@@ -420,8 +432,8 @@ class Stage {
 }
 
 class NameBuilder {
-    static String getProjectFilename(projectName) {
-        return projectName + ".xcodeproj"
+    static String getProjectFilename(projectPath, projectName) {
+        return projectPath + "/" + projectName + ".xcodeproj"
     }
 
     static String getWorkspaceFilename(workspaceName) {

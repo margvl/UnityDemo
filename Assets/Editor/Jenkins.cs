@@ -94,14 +94,14 @@ class Jenkins {
         string appName = "";
         for (int i = 0; i < argList.Length; i++) {
             if (argList[i] == "-executeMethod") {
-                // "-executeMethod <method name> <output name> <app name>"
+                // "-executeMethod <method name> <output name> <project name>"
                 if (i + 3 <= argList.Length) {
                     outputPath = argList[i + 2];
                     appName = argList[i + 3];
                     i += 3;
                 } else {
                     Console.WriteLine("ERROR! Incorrect parameters for -executeMethod " +
-                                      "Expected format: -executeMethod <method name> <output path> <app name>");
+                                      "Expected format: -executeMethod <method name> <output path> <project name>");
                     return null;
                 }
             }
