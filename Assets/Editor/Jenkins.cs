@@ -90,22 +90,20 @@ class Jenkins {
             return null;
         }
 
-        string appName = "";
         string outputPath = "";
+        string appName = "";
         for (int i = 0; i < argList.Length; i++) {
             if (argList[i] == "-executeMethod") {
-                if (i + 4 < argList.Length) {
-                    // BuildMacOS method is args[i+1]
-                    appName = argList[i + 2];
-                    outputPath = argList[i + 3];
+                // "-executeMethod <method name> <output name> <app name>"
+                if (i + 3 <= argList.Length) {
+                    outputPath = argList[i + 2];
+                    appName = argList[i + 3];
                     i += 3;
                 } else {
                     Console.WriteLine("ERROR! Incorrect parameters for -executeMethod " +
-                                      "Expected format: -executeMethod <method name> <app name> <output path>");
+                                      "Expected format: -executeMethod <method name> <output path> <app name>");
                     return null;
                 }
-            } else {
-                Console.WriteLine("ERROR! Missing command line argument -executeMethod");
             }
         }
 
