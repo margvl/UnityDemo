@@ -19,7 +19,7 @@
             "title": "Export",
             "platforms": ["iOS", "android"]
         },
-        "iOSBuild": {
+        "build": {
             "isEnabled": true,
             "title": "Build",
             "items": [

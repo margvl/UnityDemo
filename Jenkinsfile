@@ -6,6 +6,7 @@ node {
 
         catchError {
             executeSetUpStage()
+            executeUnityExportStageIfNeeded()
             executeBuildStageIfNeeded()
             executeDistributionStageIfNeeded()
         }
@@ -57,6 +58,17 @@ void executeCocoapodsStepIfNeeded() {
     CocoaPodsStep cocoaPodsStep = setUpStage.cocoaPodsStep
     if (cocoaPodsStep.isEnabled) {
         run(cocoaPodsStep.executionCommand())
+    }
+}
+
+void executeUnityExportStageIfNeeded() {
+    if (unityExportStage.isEnabled) {
+        stage(unityExportStage.title) {
+            String[] executionCommandList = unityExportStage.executionCommands()
+            executionCommandList.each { executionCommand ->
+                run(executionCommand)
+            }
+        }
     }
 }
 
@@ -149,20 +161,28 @@ class UnityExportStage extends Stage {
     }
 
     String[] executionCommand() {
-        return "/Applications/Unity/Hub/Editor/${unityVersion}/Unity.app/Contents/MacOS/Unity" +
-                " -quite" +
-                " -batchmode" +
-                " -executeMethod ${executionMethod()}" +
-                " -nographics"
+        String[] executionCommandList = []
+        platformList.each { platform ->
+            String executionMethod = executionMethod(platform)
+            if (executionMethod) {
+                String executionCommand = "/Applications/Unity/Hub/Editor/${unityVersion}/Unity.app/Contents/MacOS/Unity" +
+                        " -quite" +
+                        " -batchmode" +
+                        " -executeMethod ${executionMethod}" +
+                        " -nographics"
+                executionCommandList += executionCommand
+            }
+        }
+        return executionCommandList
     }
 
-    private String executionMethod() {
-        switch platform {
+    private String executionMethod(String platform) {
+        switch (platform) {
             case "iOS": return "Jenkins.PerformIOSBuild"
             case "android": return "Jenkins.PerformAndroidBuild"
             default:
                 println("ERROR! Unsupported platform: " + platform)
-                break
+                return null
         }
     }
 }
