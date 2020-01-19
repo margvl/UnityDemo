@@ -177,7 +177,7 @@ class UnityExportStage extends Stage {
                         " -nographics" +
                         " -batchmode" +
                         " -quit" +
-                        " -projectPath \"${projectPath}\""
+                        " -projectPath \"${projectPath}\"" +
                         " -executeMethod ${executionMethod} \"${outputPath}\" \"${appName}\""
                 executionCommandList += executionCommand
             }
