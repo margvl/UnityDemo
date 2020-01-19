@@ -159,7 +159,7 @@ class UnityExportStage extends Stage {
         this.platformList = platforms
     }
 
-    String[] executionCommand() {
+    String[] executionCommands() {
         String[] executionCommandList = []
         platformList.each { platform ->
             String executionMethod = executionMethod(platform)
