@@ -50,7 +50,6 @@ void executeSetUpStage() {
     stage(setUpStage.title) {
         run(setUpStage.dependenciesInstallationCommand())
         executeCocoapodsStepIfNeeded()
-        executeCarthageStepIfNeeded()
     }
 }
 
