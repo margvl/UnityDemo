@@ -182,8 +182,8 @@ class UnityExportStage extends Stage {
 
     private String executionMethod(String platform) {
         switch (platform) {
-            case "iOS": return "PerformIOSBuild"
-            case "android": return "PerformAndroidBuild"
+            case "iOS": return "Jenkins.PerformIOSBuild"
+            case "android": return "Jenkins.PerformAndroidBuild"
             default:
                 println("ERROR! Unsupported platform: " + platform)
                 return null
