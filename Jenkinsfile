@@ -147,6 +147,7 @@ SetUpStage getSetUpStage(Map setUp) {
 // --------------------------
 class UnityExportStage extends Stage {
     String unityVersion
+    String projectPath
     String outputPath
     String appName
     String[] platformList
@@ -155,11 +156,13 @@ class UnityExportStage extends Stage {
             Boolean isEnabled, 
             String title, 
             String unityVersion,
+            String projectPath,
             String outputPath,
             String appName,
             String[] platforms) {
         super(isEnabled, title)
         this.unityVersion = unityVersion
+        this.projectPath = projectPath
         this.outputPath = outputPath
         this.appName = appName
         this.platformList = platforms
@@ -174,6 +177,7 @@ class UnityExportStage extends Stage {
                         " -nographics" +
                         " -batchmode" +
                         " -quit" +
+                        " -projectPath \"${projectPath}\""
                         " -executeMethod ${executionMethod} \"${outputPath}\" \"${appName}\""
                 executionCommandList += executionCommand
             }
@@ -198,6 +202,7 @@ UnityExportStage getUnityExportStage(Map environment, Map unityExport) {
             platformList.size() > 0,
             unityExport.title,
             environment.unityVersion,
+            env.WORKSPACE,
             environment.outputPath,
             environment.appName,
             platformList)
