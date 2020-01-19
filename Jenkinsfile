@@ -172,8 +172,7 @@ class UnityExportStage extends Stage {
             if (executionMethod) {
                 String executionCommand = "/Applications/Unity/Hub/Editor/${unityVersion}/Unity.app/Contents/MacOS/Unity" +
                         " -quite" +
-                        " -batchmode" +
-                        " -executeMethod ${executionMethod} ${outputPath} ${appName}" +
+                        " -executeMethod ${executionMethod} \"${outputPath}\" \"${appName}\"" +
                         " -nographics"
                 executionCommandList += executionCommand
             }
