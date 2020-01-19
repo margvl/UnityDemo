@@ -6,7 +6,7 @@ node {
 
         catchError {
             executeSetUpStage()
-            // executeUnityExportStageIfNeeded()
+            executeUnityExportStageIfNeeded()
             executeBuildStageIfNeeded()
             executeDistributionStageIfNeeded()
         }
@@ -213,15 +213,6 @@ UnityExportStage getUnityExportStage(Map environment, Map unityExport) {
 // -------------------
 // --- Build Stage ---
 // -------------------
-// bundle exec fastlane build 
-//         projectFilename:null.xcodeproj 
-//         configuration:Release 
-//         scheme:JenkinsDemo-Staging 
-//         outputPath:build/output/gym 
-//         outputName:null-0.ipa 
-//         exportMethod:ad-hoc 
-//         provisioningProfiles:com.telesoftas.unity.demo.staging=>Generic Adhoc
-
 class BuildStage extends Stage {
     String projectPath
     String projectFilename

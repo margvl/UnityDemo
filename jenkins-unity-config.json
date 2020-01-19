@@ -23,7 +23,7 @@
                 {
                     "id": "0",
                     "configuration": "Release",
-                    "scheme": "JenkinsDemo-Staging",
+                    "scheme": "Unity-iPhone",
                     "exportMethod": "ad-hoc",
                     "provisioningProfiles": [
                         {
