@@ -1,10 +1,7 @@
 {
     "environment": {
         "unityVersion": "2019.3.0f5",
-        "projectName": "JenkinsDemo",
-        "workspaceName": "JenkinsDemo",
-        "sourcePath": "JenkinsDemo",
-        "reportPath": "build/report",
+        "appName": "UnityDemo",
         "outputPath": "build/output"
     },
     "stages": {

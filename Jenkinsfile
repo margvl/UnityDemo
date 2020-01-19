@@ -147,15 +147,21 @@ SetUpStage getSetUpStage(Map setUp) {
 // --------------------------
 class UnityExportStage extends Stage {
     String unityVersion
+    String outputPath
+    String appName
     String[] platformList
 
     UnityExportStage(
             Boolean isEnabled, 
             String title, 
-            String unityVersion, 
+            String unityVersion,
+            String outputPath,
+            String appName,
             String[] platforms) {
         super(isEnabled, title)
         this.unityVersion = unityVersion
+        this.outputPath = outputPath
+        this.appName = appName
         this.platformList = platforms
     }
 
@@ -167,7 +173,7 @@ class UnityExportStage extends Stage {
                 String executionCommand = "/Applications/Unity/Hub/Editor/${unityVersion}/Unity.app/Contents/MacOS/Unity" +
                         " -quite" +
                         " -batchmode" +
-                        " -executeMethod ${executionMethod}" +
+                        " -executeMethod ${executionMethod} ${outputPath} ${appName}" +
                         " -nographics"
                 executionCommandList += executionCommand
             }
@@ -177,8 +183,8 @@ class UnityExportStage extends Stage {
 
     private String executionMethod(String platform) {
         switch (platform) {
-            case "iOS": return "Jenkins.PerformIOSBuild"
-            case "android": return "Jenkins.PerformAndroidBuild"
+            case "iOS": return "PerformIOSBuild"
+            case "android": return "PerformAndroidBuild"
             default:
                 println("ERROR! Unsupported platform: " + platform)
                 return null
@@ -192,6 +198,8 @@ UnityExportStage getUnityExportStage(Map environment, Map unityExport) {
             platformList.size() > 0,
             unityExport.title,
             environment.unityVersion,
+            environment.outputPath,
+            environment.appName,
             platformList)
 
     return unityExportStage
