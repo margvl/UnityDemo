@@ -232,14 +232,12 @@ class BuildStage extends Stage {
     BuildStage(
             Boolean isEnabled,
             String title,
-            String projectPath,
             String projectFilename,
             String workspaceFilename,
             String outputPath,
             BuildItem[] items) {
         
         super(isEnabled, title)
-        this.projectPath = projectPath
         this.projectFilename = projectFilename
         this.workspaceFilename = workspaceFilename
         this.outputPath = outputPath
