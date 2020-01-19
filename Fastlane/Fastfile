@@ -1,0 +1,36 @@
+fastlane_version '2.66.2'
+
+desc 'Install dependencies via CocoaPods'
+lane :pods do |options|
+  cocoapods(
+    podfile: options[:podFile]
+  )
+end
+
+desc 'Run building process'
+lane :build do |options|
+  provisioningProfilesString = options[:provisioningProfiles]
+  profileValuePairStringList = provisioningProfilesString.split(',')
+  provisioningProfiles = {}
+  profileValuePairStringList.each do |profilePairString|
+    profileValueList = profilePairString.split('=>')
+    provisioningProfiles[profileValueList.first] = profileValueList.last
+  end
+
+  gym(
+    project: options[:projectFilename],
+    workspace: options[:workspaceFilename],
+    configuration: options[:configuration],
+    scheme: options[:scheme],
+    clean: true,
+    output_directory: options[:outputPath],
+    output_name: options[:outputName],
+    skip_profile_detection: true,
+    export_xcargs: '-allowProvisioningUpdates',
+    export_method: options[:exportMethod],
+    export_options: {
+      signingStyle: 'manual',
+      provisioningProfiles: provisioningProfiles
+    }
+  )
+end

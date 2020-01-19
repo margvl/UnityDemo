@@ -1,0 +1,49 @@
+{
+    "environment": {
+        "unityVersion": "2019.3.0f5",
+        "projectName": "JenkinsDemo",
+        "workspaceName": "JenkinsDemo",
+        "sourcePath": "JenkinsDemo",
+        "reportPath": "build/report",
+        "outputPath": "build/output"
+    },
+    "stages": {
+        "setUp": {
+            "title": "Set Up",
+            "cocoaPods": {
+                "isEnabled": false,
+                "podFile": "Podfile"
+            }
+        },
+        "unityExport": {
+            "title": "Export",
+            "platforms": ["iOS", "android"]
+        },
+        "iOSBuild": {
+            "isEnabled": true,
+            "title": "Build",
+            "items": [
+                {
+                    "id": "0",
+                    "configuration": "Release",
+                    "scheme": "JenkinsDemo-Staging",
+                    "exportMethod": "ad-hoc",
+                    "provisioningProfiles": [
+                        {
+                            "id": "com.telesoftas.unity.demo.staging",
+                            "name": "Generic Adhoc"
+                        }
+                    ]
+                }
+            ]
+        },
+        "distribution": {
+            "title": "Distribution",
+            "firebase": {
+                "appId": "1:312875670966:ios:1e8be4cf32a5d786f17517",
+                "testersGroupIds": ["internal-testers"],
+                "buildId": "0"
+            }
+        }
+    }
+}
