@@ -327,7 +327,7 @@ BuildStage getBuildStage(Map environment, Map build) {
         
         BuildItem buildItem = new BuildItem(
                 item.id,
-                PathBuilder.getOutputPathWithFilename(environment.outputPath, PLATFROM_IOS, environment.projectName, item.id),
+                PathBuilder.getOutputPathWithFilename(environment.outputPath, "ios", environment.projectName, item.id),
                 item.configuration,
                 item.scheme,
                 item.exportMethod,
