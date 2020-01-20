@@ -36,11 +36,19 @@
         },
         "distribution": {
             "title": "Distribution",
-            "firebase": {
-                "appId": "1:312875670966:ios:1e8be4cf32a5d786f17517",
-                "testersGroupIds": ["internal-testers"],
-                "buildId": "0"
-            }
+            "firebase": [
+                {
+                    "platform": "iOS",
+                    "appId": "1:312875670966:ios:1e8be4cf32a5d786f17517",
+                    "testersGroupIds": ["internal-testers"],
+                    "buildId": "0"
+                }, {
+                    "platform": "android",
+                    "appId": "",
+                    "testersGroupIds": ["internal-testers"],
+                    "buildId": "0"
+                }
+            ]
         }
     }
 }

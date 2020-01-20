@@ -15,6 +15,8 @@ node {
     }
 }
 
+String PLATFORM_IOS = "ios"
+String PLATFORM_ANDROID = "android"
 
 SetUpStage setUpStage = null
 UnityExportStage unityExportStage = null;
@@ -43,7 +45,7 @@ void loadUp(String filename) {
     setUpStage = getSetUpStage(setUp)
     unityExportStage = getUnityExportStage(environment, unityExport)
     buildStage = getBuildStage(environment, build)
-    distributionStage = getDistributionStage(distribution, buildStage)
+    distributionStage = getDistributionStage(environment, distribution, buildStage)
 }
 
 void executeSetUpStage() {
@@ -98,6 +100,7 @@ void executeFirebaseDistributionStepIfNeeded() {
         }
     }
 }
+
 
 // --------------------
 // --- Set Up Stage ---
@@ -187,8 +190,8 @@ class UnityExportStage extends Stage {
 
     private String executionMethod(String platform) {
         switch (platform) {
-            case "iOS": return "Jenkins.PerformIOSBuild"
-            case "android": return "Jenkins.PerformAndroidBuild"
+            case PLATFORM_IOS: return "Jenkins.PerformIOSBuild"
+            case PLATFORM_ANDROID: return "Jenkins.PerformAndroidBuild"
             default:
                 println("ERROR! Unsupported platform: " + platform)
                 return null
@@ -210,11 +213,11 @@ UnityExportStage getUnityExportStage(Map environment, Map unityExport) {
     return unityExportStage
 }
 
+
 // -------------------
 // --- Build Stage ---
 // -------------------
 class BuildStage extends Stage {
-    String projectPath
     String projectFilename
     String workspaceFilename
     String outputPath
@@ -327,7 +330,7 @@ BuildStage getBuildStage(Map environment, Map build) {
         
         BuildItem buildItem = new BuildItem(
                 item.id,
-                NameBuilder.getOutputName(environment.projectName, item.id),
+                PathBuilder.getOutputPathWithFilename(environment.outputPath, PLATFROM_IOS, environment.projectName, item.id),
                 item.configuration,
                 item.scheme,
                 item.exportMethod,
@@ -339,9 +342,9 @@ BuildStage getBuildStage(Map environment, Map build) {
     return new BuildStage(
             buildItemList.size() > 0,
             build.title,
-            NameBuilder.getProjectFilename(environment.outputPath + "/ios/project", "Unity-iPhone"),
-            NameBuilder.getWorkspaceFilename(null),
-            environment.outputPath + "/ios/gym",
+            PathBuilder.getProjectPathWithFilename(environment.outputPath + "/${PLATFORM_IOS}/project", "Unity-iPhone"),
+            PathBuilder.getWorkspacePathWithFilename(null),
+            PathBuilder.getOutputPath(environment.outputPath, PLATFORM_IOS),
             buildItemList)
 }
 
@@ -364,37 +367,60 @@ class DistributionStage extends Stage {
 
 class FirebaseDistributionStep implements StageStep {
     Boolean isEnabled
-    String firebaseAppId
-    String[] testersGroupIdList
-    String buildPath
+    FirebaseDistributionItem[] itemList
 
-    FirebaseDistributionStep(
-            String firebaseAppId,
-            String[] testersGroupIds,
-            String buildPath) {
-
-        this.isEnabled = firebaseAppId?.trim()
-        this.firebaseAppId = firebaseAppId
-        this.testersGroupIdList = testersGroupIds
-        this.buildPath = buildPath
+    FirebaseDistributionStep(FirebaseDistributionItem[] items) {
+        this.isEnabled = (items.size() > 0)
+        this.itemList = items
     }
 
-    String executionCommand() {
-        return "firebase" +
-                " appdistribution:distribute \"${buildPath}\"" +
-                " --groups \"${testersGroupIdList.join(',')}\"" +
-                " --release-notes \"\"" +
-                " --app ${firebaseAppId}"
+    String[] executionCommands() {
+        String[] executionCommandList = []
+        itemList.each { item ->
+            String executionCommand = item.distributionCommand()
+            executionCommandList += executionCommand
+        }
+        return executionCommandList
     }
 }
 
-DistributionStage getDistributionStage(Map distribution, BuildStage buildStage) {
-    Map firebaseDistribution = distribution.firebase
-    FirebaseDistributionStep firebaseDistributionStep = new FirebaseDistributionStep(
-            firebaseDistribution.appId,
-            getStringListFromJSONArray(firebaseDistribution.testersGroupIds),
-            buildStage.buildPath(firebaseDistribution.buildId))
+class FirebaseDistributionItem {
+    String appId
+    String[] testersGroupIdList
+    String buildPathWithFilename
 
+    FirebaseDistributionItem(
+            String appId,
+            String[] testersGroupIds,
+            String buildPathWithFilename) {
+        this.appId = appId
+        this.testersGroupIdList = testersGroupIds
+        this.buildPathWithFilename = buildPathWithFilename
+    }
+
+    String distributionCommand() {
+        return "firebase" +
+                " appdistribution:distribute \"${buildPathWithFilename}\"" +
+                " --groups \"${testersGroupIdList.join(',')}\"" +
+                " --release-notes \"\"" +
+                " --app ${appId}"
+    }
+}
+
+DistributionStage getDistributionStage(Map environment, Map distribution, BuildStage buildStage) {
+    Map firebaseDistribution = distribution.firebase
+    List itemList = firebaseDistribution.items
+    FirebaseDistributionItem distributionItemList = []
+    itemList.each { item ->
+        String buildPath = PathBuilder.getOutputPathWithFilename(environment.outputPath, item.platform, environment.projectName, item.buildId)
+        FirebaseDistributionItem distributionItem = new FirebaseDistributionItem(
+            item.appId,
+            getStringListFromJSONArray(item.testersGroupIds),
+            buildPath)
+        distributionItemList += distributionItem
+    }
+
+    FirebaseDistributionStep firebaseDistributionStep = new FirebaseDistributionStep(distributionItemList)
     return new DistributionStage(
             firebaseDistributionStep.isEnabled,
             distribution.title,
@@ -402,104 +428,9 @@ DistributionStage getDistributionStage(Map distribution, BuildStage buildStage) 
 }
 
 
-// ---------------
-// --- Helpers ---
-// ---------------
-interface StageStep {
-    Boolean isEnabled
-    String executionCommand()
-}
-
-class Stage {
-    Boolean isEnabled
-    String title
-    
-    Stage(Boolean isEnabled, String title) {
-        this.isEnabled = isEnabled
-        this.title = title
-    }
-}
-
-class NameBuilder {
-    static String getProjectFilename(projectPath, projectName) {
-        return projectPath + "/" + projectName + ".xcodeproj"
-    }
-
-    static String getWorkspaceFilename(workspaceName) {
-        return (workspaceName.getClass() == String) ? (workspaceName + ".xcworkspace") : null
-    }
-    
-    static String getOutputName(projectName, buildId) {
-        return projectName + "-" + buildId + ".ipa"
-    }
-}
-
-class ParamBuilder {
-    static String getProjectFilenameParam(String projectFilename) {
-        return " projectFilename:" + projectFilename
-    }
-
-    static String getWorkspaceFilenameParam(String workspaceFilename) {
-        return (workspaceFilename == null) ? "" : (" workspaceFilename:" + workspaceFilename)
-    }
-    
-    static String getProjectFilenameOrWorkspaceFilenameParam(String projectFilename, String workspaceFilename) {
-        return (workspaceFilename == null) ?
-            getProjectFilenameParam(projectFilename) :
-            getWorkspaceFilenameParam(workspaceFilename)
-    }
-
-    static String getOutputPathParam(String outputPath) {
-        return " outputPath:" + outputPath
-    }
-
-    static String getConfigurationParam(String configuration) {
-        return " configuration:" + configuration
-    }
-
-    static String getExportMethodParam(String exportMethod) {
-        return " exportMethod:" + exportMethod
-    }
-
-    static String getProvisioningProfilesParam(String provisioningProfiles) {
-        return " provisioningProfiles:" + "\"" + provisioningProfiles + "\""
-    }
-
-    static String getOutputNameParam(String outputName) {
-        return " outputName:" + "\"" + outputName + "\""
-    }
-
-    static String getSchemeParam(String scheme) {
-        return " scheme:" + "\"" + scheme + "\""
-    }
-
-    static String getPodFileParam(String podFile) {
-        return " podFile:" + "\"" + podFile + "\""
-    }
-}
-
-String[] getStringListFromJSONArray(array) {
-    String[] stringList = []
-    array.each { value ->
-        stringList += value
-    }
-    return stringList
-}
-
-void makeDirectory(String path) {
-    run("mkdir -p ${path}")
-}
-
-void run(String command) {
-    sh command
-}
-
-
-
-
-
-
-
+// -------------
+// --- Slack ---
+// -------------
 void postBuildFailureMessagesIfNeeded() {
     if (isJobResultFlagSuccessful()) {
         return
@@ -577,4 +508,125 @@ String getAuthorSlackName() {
     }
     
     return null
+}
+
+
+// ---------------
+// --- Helpers ---
+// ---------------
+interface StageStep {
+    Boolean isEnabled
+    String executionCommand()
+}
+
+class Stage {
+    Boolean isEnabled
+    String title
+    
+    Stage(Boolean isEnabled, String title) {
+        this.isEnabled = isEnabled
+        this.title = title
+    }
+}
+
+class PathBuilder {
+    static String getProjectPathWithFilename(projectPath, projectName) {
+        return projectPath + "/" + projectName + ".xcodeproj"
+    }
+
+    static String getWorkspacePathWithFilename(projectPath, workspaceName) {
+        String updatedWorkspaceName = (workspaceName.getClass() == String) ? (workspaceName + ".xcworkspace") : null
+        if (updatedWorkspaceName == null) {
+            return null
+        }
+
+        return projectPath + "/" + updatedWorkspaceName
+    }
+    
+    static String getOutputPathWithFilename(outputPath, platform, projectName, suffix) {
+        String updatedOutputPath = getOutputPath(outputPath, platform) + "/"
+        String adjustedSuffix = (suffix.getClass() == String) ? ("-" + suffix) : ""
+        String extension = "." + getOutputFilenameExtension(platform)
+        return updatedOutputPath + projectName + adjustedSuffix + extension
+    }
+
+    static String getOutputPath(outputPath, platform) {
+        switch(platform) {
+            case PLATFORM_IOS: return outputPath + "/${PLATFORM_IOS}/gym"
+            case PLATFORM_ANDROID: return outputPath + "/${PLATFORM_ANDROID}"
+            default: 
+                println("ERROR! `getOutputPath` Unsupported platform: " + platform)
+                return null
+        }
+    }
+
+    private static String getOutputFilenameExtension(platform) {
+        switch(platform) {
+            case PLATFORM_IOS: return "ipa"
+            case PLATFORM_ANDROID: return "apk" 
+            default: 
+                println("ERROR! `getOutputExtension` Unsupported platform: " + platform)
+                return null
+        }
+    }
+}
+
+class ParamBuilder {
+    static String getProjectFilenameParam(String projectFilename) {
+        return " projectFilename:" + projectFilename
+    }
+
+    static String getWorkspaceFilenameParam(String workspaceFilename) {
+        return (workspaceFilename == null) ? "" : (" workspaceFilename:" + workspaceFilename)
+    }
+    
+    static String getProjectFilenameOrWorkspaceFilenameParam(String projectFilename, String workspaceFilename) {
+        return (workspaceFilename == null) ?
+            getProjectFilenameParam(projectFilename) :
+            getWorkspaceFilenameParam(workspaceFilename)
+    }
+
+    static String getOutputPathParam(String outputPath) {
+        return " outputPath:" + outputPath
+    }
+
+    static String getConfigurationParam(String configuration) {
+        return " configuration:" + configuration
+    }
+
+    static String getExportMethodParam(String exportMethod) {
+        return " exportMethod:" + exportMethod
+    }
+
+    static String getProvisioningProfilesParam(String provisioningProfiles) {
+        return " provisioningProfiles:" + "\"" + provisioningProfiles + "\""
+    }
+
+    static String getOutputNameParam(String outputName) {
+        return " outputName:" + "\"" + outputName + "\""
+    }
+
+    static String getSchemeParam(String scheme) {
+        return " scheme:" + "\"" + scheme + "\""
+    }
+
+    static String getPodFileParam(String podFile) {
+        return " podFile:" + "\"" + podFile + "\""
+    }
+}
+
+String[] getStringListFromJSONArray(array) {
+    String[] stringList = []
+    array.each { value ->
+        stringList += value
+    }
+    return stringList
+}
+
+void makeDirectory(String path) {
+    run("mkdir -p ${path}")
+}
+
+void run(String command) {
+    sh command
 }
