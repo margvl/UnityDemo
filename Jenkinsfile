@@ -117,7 +117,7 @@ class SetUpStage extends Stage {
     }
 }
 
-class CocoaPodsStep implements StageStep {
+class CocoaPodsStep {
     Boolean isEnabled
     String podFile
     
@@ -350,7 +350,7 @@ BuildStage getBuildStage(Map environment, Map build) {
 // --- Distribution Stage ---
 // --------------------------
 class DistributionStage extends Stage {
-    StageStep firebaseDistributionStep
+    FirebaseDistributionStep firebaseDistributionStep
     
     DistributionStage(
             Boolean isEnabled,
@@ -362,7 +362,7 @@ class DistributionStage extends Stage {
     }
 }
 
-class FirebaseDistributionStep implements StageStep {
+class FirebaseDistributionStep {
     Boolean isEnabled
     FirebaseDistributionItem[] itemList
 
@@ -511,11 +511,6 @@ String getAuthorSlackName() {
 // ---------------
 // --- Helpers ---
 // ---------------
-interface StageStep {
-    Boolean isEnabled
-    String executionCommand()
-}
-
 class Stage {
     Boolean isEnabled
     String title
