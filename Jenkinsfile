@@ -15,8 +15,8 @@ node {
     }
 }
 
-String PLATFORM_IOS = "ios"
-String PLATFORM_ANDROID = "android"
+static String PLATFORM_IOS = "ios"
+static String PLATFORM_ANDROID = "android"
 
 SetUpStage setUpStage = null
 UnityExportStage unityExportStage = null;
