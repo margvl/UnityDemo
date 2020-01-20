@@ -429,7 +429,7 @@ for: java.util.Map(net.sf.json.JSONObject, net.sf.json.JSONObject)
 DistributionStage getDistributionStage(Map environment, Map distribution, BuildStage buildStage) {
     Map firebaseDistribution = distribution.firebase
     List itemList = firebaseDistribution.items
-    FirebaseDistributionItem distributionItemList = []
+    FirebaseDistributionItem[] distributionItemList = []
     itemList.each { item ->
         String firebaseAppId = (item.appId.getClass() == String) ? item.appId : null
         String buildPath = PathBuilder.getOutputPathWithFilename(environment.outputPath, item.platform, environment.projectName, item.buildId)
