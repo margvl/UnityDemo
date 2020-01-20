@@ -404,28 +404,6 @@ class FirebaseDistributionItem {
     }
 }
 
-/*
-hudson.remoting.ProxyException: org.codehaus.groovy.runtime.typehandling.GroovyCastException: 
-    Cannot cast object 
-    '[
-        {
-            "platform":"iOS",
-            "appId":"1:312875670966:ios:1e8be4cf32a5d786f17517",
-            "testersGroupIds":["internal-testers"],
-            "buildId":"0"
-        },{
-            "platform":"android",
-            "appId":"",
-            "testersGroupIds":["internal-testers"],
-            "buildId":"0"
-        }
-    ]' 
-with class 'net.sf.json.JSONArray' 
-to class 'java.util.Map' 
-due to: groovy.lang.GroovyRuntimeException: Could not find matching constructor 
-for: java.util.Map(net.sf.json.JSONObject, net.sf.json.JSONObject)
-*/
-
 DistributionStage getDistributionStage(Map environment, Map distribution, BuildStage buildStage) {
     Map firebaseDistribution = distribution.firebase
     List itemList = firebaseDistribution.items
