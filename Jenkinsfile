@@ -312,7 +312,6 @@ class BuildProfile {
 
 BuildStage getBuildStage(Map environment, Map build) {
     List itemList = build.items
-    
     BuildItem[] buildItemList = []
     itemList.each { item ->
         List profileList = item.provisioningProfiles
@@ -405,17 +404,42 @@ class FirebaseDistributionItem {
     }
 }
 
+/*
+hudson.remoting.ProxyException: org.codehaus.groovy.runtime.typehandling.GroovyCastException: 
+    Cannot cast object 
+    '[
+        {
+            "platform":"iOS",
+            "appId":"1:312875670966:ios:1e8be4cf32a5d786f17517",
+            "testersGroupIds":["internal-testers"],
+            "buildId":"0"
+        },{
+            "platform":"android",
+            "appId":"",
+            "testersGroupIds":["internal-testers"],
+            "buildId":"0"
+        }
+    ]' 
+with class 'net.sf.json.JSONArray' 
+to class 'java.util.Map' 
+due to: groovy.lang.GroovyRuntimeException: Could not find matching constructor 
+for: java.util.Map(net.sf.json.JSONObject, net.sf.json.JSONObject)
+*/
+
 DistributionStage getDistributionStage(Map environment, Map distribution, BuildStage buildStage) {
     Map firebaseDistribution = distribution.firebase
     List itemList = firebaseDistribution.items
     FirebaseDistributionItem distributionItemList = []
     itemList.each { item ->
+        String firebaseAppId = (item.appId.getClass() == String) ? item.appId : null
         String buildPath = PathBuilder.getOutputPathWithFilename(environment.outputPath, item.platform, environment.projectName, item.buildId)
-        FirebaseDistributionItem distributionItem = new FirebaseDistributionItem(
-            item.appId,
-            getStringListFromJSONArray(item.testersGroupIds),
-            buildPath)
-        distributionItemList += distributionItem
+        if (firebaseAppId) {
+            FirebaseDistributionItem distributionItem = new FirebaseDistributionItem(
+                firebaseAppId,
+                getStringListFromJSONArray(item.testersGroupIds),
+                buildPath)
+            distributionItemList += distributionItem
+        }
     }
 
     FirebaseDistributionStep firebaseDistributionStep = new FirebaseDistributionStep(distributionItemList)
