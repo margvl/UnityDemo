@@ -336,11 +336,12 @@ BuildStage getBuildStage(Map environment, Map build) {
         buildItemList += buildItem
     }
 
+    String outputPath = environment.outputPath + "/ios/project"
     return new BuildStage(
             buildItemList.size() > 0,
             build.title,
-            PathBuilder.getProjectPathWithFilename(environment.outputPath + "/ios/project", "Unity-iPhone"),
-            PathBuilder.getWorkspacePathWithFilename(null),
+            PathBuilder.getProjectPathWithFilename(outputPath, "Unity-iPhone"),
+            PathBuilder.getWorkspacePathWithFilename(outputPath, null),
             PathBuilder.getOutputPath(environment.outputPath, "ios"),
             buildItemList)
 }
