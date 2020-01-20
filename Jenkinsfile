@@ -15,11 +15,11 @@ node {
     }
 }
 
-static String PLATFORM_IOS = "ios"
+static String platform_ios = "ios"
 static String PLATFORM_ANDROID = "android"
 
 SetUpStage setUpStage = null
-UnityExportStage unityExportStage = null;
+UnityExportStage unityExportStage = null
 BuildStage buildStage = null
 DistributionStage distributionStage = null
 
@@ -190,7 +190,7 @@ class UnityExportStage extends Stage {
 
     private String executionMethod(String platform) {
         switch (platform) {
-            case PLATFORM_IOS: return "Jenkins.PerformIOSBuild"
+            case platform_ios: return "Jenkins.PerformIOSBuild"
             case PLATFORM_ANDROID: return "Jenkins.PerformAndroidBuild"
             default:
                 println("ERROR! Unsupported platform: " + platform)
@@ -342,9 +342,9 @@ BuildStage getBuildStage(Map environment, Map build) {
     return new BuildStage(
             buildItemList.size() > 0,
             build.title,
-            PathBuilder.getProjectPathWithFilename(environment.outputPath + "/${PLATFORM_IOS}/project", "Unity-iPhone"),
+            PathBuilder.getProjectPathWithFilename(environment.outputPath + "/${platform_ios}/project", "Unity-iPhone"),
             PathBuilder.getWorkspacePathWithFilename(null),
-            PathBuilder.getOutputPath(environment.outputPath, PLATFORM_IOS),
+            PathBuilder.getOutputPath(environment.outputPath, platform_ios),
             buildItemList)
 }
 
@@ -552,7 +552,7 @@ class PathBuilder {
 
     static String getOutputPath(outputPath, platform) {
         switch(platform) {
-            case PLATFORM_IOS: return outputPath + "/${PLATFORM_IOS}/gym"
+            case platform_ios: return outputPath + "/${platform_ios}/gym"
             case PLATFORM_ANDROID: return outputPath + "/${PLATFORM_ANDROID}"
             default: 
                 println("ERROR! `getOutputPath` Unsupported platform: " + platform)
@@ -562,7 +562,7 @@ class PathBuilder {
 
     private static String getOutputFilenameExtension(platform) {
         switch(platform) {
-            case PLATFORM_IOS: return "ipa"
+            case platform_ios: return "ipa"
             case PLATFORM_ANDROID: return "apk" 
             default: 
                 println("ERROR! `getOutputExtension` Unsupported platform: " + platform)
